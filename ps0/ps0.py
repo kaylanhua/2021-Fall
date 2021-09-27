@@ -34,8 +34,18 @@ def calculate_size(T):
     # The return value is up to you
     
     # Your code goes here
-    pass
-
+    if not T.left and not T.right:
+        T.temp = 1
+        return 1
+        
+    else:
+        temp = 1
+        if T.left:
+            temp += calculate_size(T.left)
+        if T.right:
+            temp += calculate_size(T.right)
+        T.temp = temp
+        return temp
 
 
 #
@@ -50,7 +60,23 @@ def FindSubtree(T, L, U):
     # Implement your Part 2 proof in O(n)-time
     # The return value is a subtree that meets the constraints
 
-    # Your code goes here
-    pass
+    if not T or (not T.left and not T.right):
+        return None
 
+    if not T.temp: 
+        calculate_size(T)
 
+    if T.left:
+        if T.left.temp <= U and T.left.temp >= L:
+            temp = T.left
+            T.left = None
+            return temp
+        else:
+            return FindSubtree(T.left, L, U)
+    else:
+        if T.right.temp <= U and T.right.temp >= L:
+            temp = T.right
+            T.right = None
+            return temp
+        else:
+            return FindSubtree(T.right, L, U)
