@@ -60,7 +60,7 @@ class BinarySearchTree:
         if left_size > ind and self.left is not None:
             return self.left.select(ind)
         if left_size < ind and self.right is not None:
-            return self.right.select(ind)
+            return self.right.select(ind - left_size - 1)
         return None
 
 
@@ -92,14 +92,15 @@ class BinarySearchTree:
         if self.key is None:
             self.key = key
         elif self.key > key: 
+            self.size += 1
             if self.left is None:
                 self.left = BinarySearchTree(self.debugger)
             self.left.insert(key)
         elif self.key < key:
+            self.size += 1
             if self.right is None:
                 self.right = BinarySearchTree(self.debugger)
             self.right.insert(key)
-        self.calculate_sizes()
         return self
 
     
@@ -110,8 +111,35 @@ class BinarySearchTree:
     Returns the root of the tree or None if the tree has no nodes   
     '''
     def delete(self, key):
-        # Your code goes here
-        pass
+        if self is None:
+            return self
+
+        found = self.search(key)
+        if not found:
+            print("key does not exist")
+            return self
+
+        return self.deleteHelper(key)
+
+    def deleteHelper(self, key):
+        self.size -= 1
+
+        if key < self.key:
+            self.left = self.left.deleteHelper(key)
+        elif key > self.key:
+            self.right = self.right.deleteHelper(key)
+
+        else:
+            if self.left is None:
+                return self.right
+            elif self.right is None:
+                return self.left
+            else:
+                temp = self.left.select(self.left.size - 1)
+                self.key = temp.key
+                self.left = self.left.deleteHelper(temp.key)
+
+        return self
 
     '''
     Performs a `direction`-rotate the `side`-child of (the root of) T (self)
@@ -140,7 +168,50 @@ class BinarySearchTree:
        11 
     '''
     def rotate(self, direction, child_side):
-        # Your code goes here
+        if child_side == "R":
+            ogRight = self.right
+            if direction == "L":
+                newRight = self.right.right
+                self.right.right = self.right.right.left
+                self.right = newRight
+                self.right.left = ogRight
+                b = 0 if newRight.left is None else newRight.left.size
+            else:
+                newRight = self.right.left
+                self.right.left = self.right.left.right
+                self.right = newRight
+                self.right.right = ogRight
+                b = 0 if newRight.right is None else newRight.right.size
+            a = newRight.size 
+            c = ogRight.size
+            self.right.size = c
+            if direction == "L":
+                self.right.left.size = c - a + b
+            else: 
+                self.right.right.size = c - a + b
+            
+        else:
+            ogLeft = self.left
+            if direction == "R":
+                newLeft = self.left.left
+                self.left.left = self.left.left.right
+                self.left = newLeft
+                self.left.right = ogLeft
+                b = 0 if newLeft.right is None else newLeft.right.size
+            else:
+                newLeft = self.left.right
+                self.left.right = self.left.right.left
+                self.left = newLeft
+                self.left.left = ogLeft
+                b = 0 if newLeft.left is None else newLeft.left.size
+            a = newLeft.size 
+            c = ogLeft.size
+            self.left.size = c
+            if direction == "L":
+                self.left.left.size = c - a + b
+            else: 
+                self.left.right.size = c - a + b
+    
         return self
 
     def print_bst(self):
